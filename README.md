@@ -1,7 +1,7 @@
 # `mac_address`
 
 A cross-platform library to retrieve the MAC address from your network
-interfaces.
+interfaces without `libc`.
 
 ## Install
 
