@@ -5,18 +5,10 @@ interfaces without `libc`.
 
 ## Install
 
-First, add the dependency to your `build.zig.zon file`:
+First, add the dependency to your `build.zig.zon file` using `zig fetch`:
 
-```zig
-.{
-    .name = "my-awesome-project",
-    .version = "1.2.3",
-    .dependencies = .{
-        .mac_address = .{
-            .url = "git+https://github.com/weskoerber/mac_address#main",
-        },
-    },
-}
+```console
+zig fetch --save git+https://github.com/weskoerber/mac_address#main
 ```
 
 Then, import `mac_address` into your `build.zig`:
