@@ -9,9 +9,6 @@ pub const getAll = switch (native_os) {
 
 const std = @import("std");
 const builtin = @import("builtin");
-const debug = std.debug;
-const mem = std.mem;
-const unicode = std.unicode;
 
 const linux = @import("linux.zig");
 const windows = @import("windows.zig");
