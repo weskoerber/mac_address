@@ -24,7 +24,7 @@ pub fn build(b: *std.Build) void {
 
     if (examples) {
         const print_all_exe = b.addExecutable(.{
-            .name = "example_1",
+            .name = "print_all",
             .target = target,
             .optimize = optimize,
             .root_source_file = b.path("examples/print_all.zig"),
