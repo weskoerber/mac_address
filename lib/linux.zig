@@ -1,10 +1,15 @@
 /// Get all available MAC addresses.
 ///
-/// This function uses the `SIOCGIFCONF` `ioctl` to retrieve a list of network
-/// interfaces, and `SIOCGIFHWADDR` to get their MAC address. In total there
-/// will be 2 + `n` syscalls, where `n` is the number of network interfaces.
-/// The first syscall determines how many interfaces there are. After that,
-/// this function allocates and deallocates only the required memory.
+/// This function uses `ioctl`  to retrieve a list of network
+/// interfaces:
+/// - `SIOCGIFCONF` to retrieve a list of interface names
+/// - `SIOCGIFFLAGS` to determine if it's a loopback device
+/// - `SIOCGIFHWADDR` to get its MAC address
+///
+/// In total there will be 2 + 2n syscalls, where `n` is the number of network
+/// interfaces. The first syscall determines how many interfaces there are.
+/// After that, this function allocates and deallocates only the required
+/// memory. Then, for each interface, its flags and MAC address are queried.
 ///
 /// The caller is owns the returned memory.
 pub fn getAll(allocator: mem.Allocator) ![]MacAddress {
@@ -20,6 +25,13 @@ pub fn getAll(allocator: mem.Allocator) ![]MacAddress {
 }
 
 /// Gets the MAC address of the first non-loopback interface.
+///
+/// Internally, this function works identically to the `getAll` function except
+/// that it returns a single `MacAddress` struct, whereas `getAll` returns a
+/// slice of `MacAddress` structs.
+///
+/// The returned memory is stack allocated and returned by value; the caller
+/// need not free anything.
 pub fn getFirstNoLoopback(allocator: mem.Allocator) !MacAddress {
     var iter = try IfIterator.initAlloc(allocator);
     defer iter.deinit();
