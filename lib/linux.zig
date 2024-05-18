@@ -92,7 +92,7 @@ const IfIterator = struct {
 
     pub fn deinit(self: *IfIterator) void {
         self.allocator.free(self.buffer);
-        linux.close(self.sock_fd);
+        _ = linux.close(self.sock_fd);
     }
 
     pub fn next(self: *IfIterator) !?MacAddress {
