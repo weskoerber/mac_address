@@ -48,3 +48,14 @@ built by setting the `examples` option to `true`:
             .examples = true,
     }).module("mac_address");
 ```
+
+## Cross-platform support
+
+| `mac_address` API  | Linux | Windows |
+| ------------------ | ----- | ------- |
+| `getAll`           | ✅    | ✅      |
+| `getAllNoLoopback` | ✅    | 📝      |
+
+- ✅ = supported
+- 📝 = planned
+- ❌ = not supported
