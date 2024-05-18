@@ -9,30 +9,9 @@
 /// The caller is owns the returned memory.
 pub fn getAll(allocator: mem.Allocator) ![]MacAddress {
     var addrs = std.ArrayList(MacAddress).init(allocator);
-    const sock = linux.socket(linux.AF.INET, linux.SOCK.DGRAM, linux.IPPROTO.IP);
-    const sock_fd = if (posix.errno(sock) == .SUCCESS)
-        @as(linux.fd_t, @intCast(sock))
-    else
-        return MacAddressError.OsError;
+    var iter = try IfIterator.initAlloc(allocator);
 
-    var ifc = mem.zeroes(ifconf);
-    var ifr = mem.zeroes(ifreq);
-
-    try ioctlReq(sock_fd, SIOCGIFCONF, &ifc);
-
-    const num_elems = @divTrunc(@as(u32, @intCast(ifc.ifc_len)), @sizeOf(ifreq));
-    const elems = try allocator.alloc(ifreq, num_elems);
-    defer allocator.free(elems);
-
-    ifc.ifc_ifu.ifc_buf = @alignCast(@ptrCast(elems.ptr));
-
-    try ioctlReq(sock_fd, SIOCGIFCONF, &ifc);
-
-    for (elems) |elem| {
-        ifr.ifrn.name = elem.ifrn.name;
-
-        try ioctlReq(sock_fd, SIOCGIFHWADDR, &ifr);
-
+    while (try iter.next()) |ifr| {
         try addrs.append(MacAddress{ .data = ifr.ifru.hwaddr.data[0..6].* });
     }
 
@@ -45,6 +24,61 @@ fn ioctlReq(fd: linux.fd_t, req: u32, arg: *anyopaque) !void {
 
     if (err != .SUCCESS) return MacAddressError.OsError;
 }
+
+const IfIterator = struct {
+    allocator: mem.Allocator,
+    buffer: []ifreq,
+    index: usize,
+    sock_fd: i32,
+
+    pub fn initAlloc(allocator: mem.Allocator) !IfIterator {
+        const sock = linux.socket(linux.AF.INET, linux.SOCK.DGRAM, linux.IPPROTO.IP);
+        const sock_fd = if (posix.errno(sock) == .SUCCESS)
+            @as(linux.fd_t, @intCast(sock))
+        else
+            return MacAddressError.OsError;
+
+        var ifc = mem.zeroes(ifconf);
+
+        try ioctlReq(sock_fd, SIOCGIFCONF, &ifc);
+
+        const num_elems = @divTrunc(@as(u32, @intCast(ifc.ifc_len)), @sizeOf(ifreq));
+        const elems = try allocator.alloc(ifreq, num_elems);
+
+        ifc.ifc_ifu.ifc_buf = @alignCast(@ptrCast(elems.ptr));
+
+        try ioctlReq(sock_fd, SIOCGIFCONF, &ifc);
+
+        return .{
+            .allocator = allocator,
+            .buffer = elems,
+            .index = 0,
+            .sock_fd = sock_fd,
+        };
+    }
+
+    pub fn deinit(self: *IfIterator) void {
+        self.allocator.free(self.buffer);
+    }
+
+    pub fn next(self: *IfIterator) !?ifreq {
+        if (self.index >= self.buffer.len) {
+            return null;
+        }
+
+        const elem = self.buffer[self.index];
+        var ifr = ifreq{
+            .ifrn = .{ .name = elem.ifrn.name },
+            .ifru = .{ .flags = 0 },
+        };
+
+        ioctlReq(self.sock_fd, SIOCGIFHWADDR, &ifr) catch return MacAddressError.OsError;
+
+        self.index += 1;
+
+        return ifr;
+    }
+};
 
 const std = @import("std");
 const linux = std.os.linux;

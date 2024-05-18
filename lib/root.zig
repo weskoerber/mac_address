@@ -1,6 +1,7 @@
 pub const MacAddress = @import("MacAddress.zig");
 pub const MacAddressError = @import("errors.zig").MacAddressError;
 
+/// Retrieve all MAC addresses, including loopback devices.
 pub const getAll = switch (native_os) {
     .linux => linux.getAll,
     .windows => windows.getAll,
