@@ -122,9 +122,22 @@ const posix = std.posix;
 
 const options = @import("options");
 
-const log = if (options.verbose) std.log.scoped(.mac_address) else fn () void{};
+const log = if (options.verbose) std.log.scoped(.mac_address) else NullLogger{};
 const MacAddress = @import("MacAddress.zig");
 const MacAddressError = @import("errors.zig").MacAddressError;
+const NullLogger = struct {
+    const T: type = fn (fmt: []const u8, args: anytype) void;
+
+    debug: T = null_log,
+    info: T = null_log,
+    warn: T = null_log,
+    err: T = null_log,
+
+    fn null_log(fmt: []const u8, args: anytype) void {
+        _ = fmt;
+        _ = args;
+    }
+};
 
 // These definitions aren't in zig's standard library
 const SIOCGIFCONF = 0x8912;
