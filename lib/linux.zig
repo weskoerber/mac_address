@@ -32,8 +32,12 @@ pub fn getFirstNoLoopback(allocator: mem.Allocator) !MacAddress {
 }
 
 fn ioctlReq(fd: linux.fd_t, req: u32, arg: *anyopaque) !void {
-    const result = linux.ioctl(fd, req, @intFromPtr(arg));
+    const arg_int = @intFromPtr(arg);
+
+    const result = linux.ioctl(fd, req, arg_int);
     const err = posix.errno(result);
+
+    log.debug("ioctl 0x{x} for fd {d} with 0x{x} returned {d} ({})", .{ req, fd, arg_int, result, err });
 
     if (err != .SUCCESS) return MacAddressError.OsError;
 }
@@ -95,6 +99,9 @@ const linux = std.os.linux;
 const mem = std.mem;
 const posix = std.posix;
 
+const options = @import("options");
+
+const log = if (options.verbose) std.log.scoped(.mac_address) else fn () void{};
 const MacAddress = @import("MacAddress.zig");
 const MacAddressError = @import("errors.zig").MacAddressError;
 

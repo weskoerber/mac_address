@@ -6,12 +6,17 @@ pub fn build(b: *std.Build) void {
     const optimize = b.standardOptimizeOption(.{});
 
     const examples = b.option(bool, "examples", "Build examples") orelse false;
+    const verbose = b.option(bool, "verbose", "Add verbose logging") orelse false;
 
     const mod = b.addModule("mac_address", .{
         .target = target,
         .optimize = optimize,
         .root_source_file = b.path("lib/root.zig"),
     });
+
+    const build_options = b.addOptions();
+    build_options.addOption(bool, "verbose", verbose);
+    mod.addOptions("options", build_options);
 
     if (target.result.os.tag == .windows) {
         const zigwin32_mod = b.dependency("zigwin32", .{
