@@ -1,4 +1,5 @@
 const std = @import("std");
+const mem = std.mem;
 
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
@@ -23,13 +24,39 @@ pub fn build(b: *std.Build) void {
     }
 
     if (examples) {
-        const print_all_exe = b.addExecutable(.{
-            .name = "print_all",
-            .target = target,
-            .optimize = optimize,
-            .root_source_file = b.path("examples/print_all.zig"),
+        buildExamples(
+            b,
+            .{ .name = "mac_address", .module = mod },
+            .{ .target = target, .optimize = optimize },
+        ) catch |err| {
+            std.debug.print("error: {}\n  -> failed building examples\n", .{err});
+        };
+    }
+}
+
+fn buildExamples(b: *std.Build, import: std.Build.Module.Import, options: anytype) !void {
+    const examples_dir = try b.build_root.join(b.allocator, &.{"examples"});
+    const dir = try b.build_root.handle.openDir(examples_dir, .{ .iterate = true });
+    var iter = dir.iterate();
+
+    while (try iter.next()) |example_src| {
+        const extension_pos = mem.indexOfScalar(u8, example_src.name, '.').?;
+
+        const root_source_file = b.pathJoin(&.{
+            "./examples",
+            example_src.name,
         });
-        print_all_exe.root_module.addImport("mac_address", mod);
-        b.installArtifact(print_all_exe);
+
+        const exe_name = example_src.name[0..extension_pos];
+
+        const exe = b.addExecutable(.{
+            .name = exe_name,
+            .target = options.target,
+            .optimize = options.optimize,
+            .root_source_file = b.path(root_source_file),
+        });
+
+        exe.root_module.addImport(import.name, import.module);
+        b.installArtifact(exe);
     }
 }

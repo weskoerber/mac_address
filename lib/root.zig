@@ -8,6 +8,11 @@ pub const getAll = switch (native_os) {
     else => |x| @panic("Unsupported OS '" ++ @tagName(x) ++ "'"),
 };
 
+pub const getFirstNoLoopback = switch (native_os) {
+    .linux => linux.getFirstNoLoopback,
+    else => |x| @panic("Unsupported OS '" ++ @tagName(x) ++ "'"),
+};
+
 const std = @import("std");
 const builtin = @import("builtin");
 

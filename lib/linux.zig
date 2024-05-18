@@ -18,6 +18,19 @@ pub fn getAll(allocator: mem.Allocator) ![]MacAddress {
     return try addrs.toOwnedSlice();
 }
 
+pub fn getFirstNoLoopback(allocator: mem.Allocator) !MacAddress {
+    var iter = try IfIterator.initAlloc(allocator);
+
+    while (try iter.next()) |ifr| {
+        if (ifr.ifru.flags & IFF_LOOPBACK != 0) {
+            continue;
+        }
+        return .{ .data = ifr.ifru.hwaddr.data[0..6].* };
+    }
+
+    return MacAddressError.NoDevice;
+}
+
 fn ioctlReq(fd: linux.fd_t, req: u32, arg: *anyopaque) !void {
     const result = linux.ioctl(fd, req, @intFromPtr(arg));
     const err = posix.errno(result);
@@ -66,17 +79,14 @@ const IfIterator = struct {
             return null;
         }
 
-        const elem = self.buffer[self.index];
-        var ifr = ifreq{
-            .ifrn = .{ .name = elem.ifrn.name },
-            .ifru = .{ .flags = 0 },
-        };
+        const elem = &self.buffer[self.index];
 
-        ioctlReq(self.sock_fd, SIOCGIFHWADDR, &ifr) catch return MacAddressError.OsError;
+        ioctlReq(self.sock_fd, SIOCGIFHWADDR, elem) catch return MacAddressError.OsError;
+        ioctlReq(self.sock_fd, SIOCGIFFLAGS, elem) catch return MacAddressError.OsError;
 
         self.index += 1;
 
-        return ifr;
+        return elem.*;
     }
 };
 
@@ -90,9 +100,11 @@ const MacAddressError = @import("errors.zig").MacAddressError;
 
 // These definitions aren't in zig's standard library
 const SIOCGIFCONF = 0x8912;
+const SIOCGIFFLAGS = 0x8913;
 const SIOCGIFHWADDR = 0x8927;
 
 const IFNAMESIZE = linux.IFNAMESIZE;
+const IFF_LOOPBACK = 0x8;
 const sockaddr = linux.sockaddr;
 
 // https://github.com/ziglang/zig/issues/19980
