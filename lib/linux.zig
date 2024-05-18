@@ -10,6 +10,7 @@
 pub fn getAll(allocator: mem.Allocator) ![]MacAddress {
     var addrs = std.ArrayList(MacAddress).init(allocator);
     var iter = try IfIterator.initAlloc(allocator);
+    defer iter.deinit();
 
     while (try iter.next()) |addr| {
         try addrs.append(addr);
@@ -21,6 +22,7 @@ pub fn getAll(allocator: mem.Allocator) ![]MacAddress {
 /// Gets the MAC address of the first non-loopback interface.
 pub fn getFirstNoLoopback(allocator: mem.Allocator) !MacAddress {
     var iter = try IfIterator.initAlloc(allocator);
+    defer iter.deinit();
 
     while (try iter.next()) |addr| {
         if (addr.is_loopback) {
@@ -78,6 +80,7 @@ const IfIterator = struct {
 
     pub fn deinit(self: *IfIterator) void {
         self.allocator.free(self.buffer);
+        linux.close(self.sock_fd);
     }
 
     pub fn next(self: *IfIterator) !?MacAddress {
