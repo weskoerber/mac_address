@@ -11,21 +11,23 @@ pub fn getAll(allocator: mem.Allocator) ![]MacAddress {
     var addrs = std.ArrayList(MacAddress).init(allocator);
     var iter = try IfIterator.initAlloc(allocator);
 
-    while (try iter.next()) |ifr| {
-        try addrs.append(MacAddress{ .data = ifr.ifru.hwaddr.data[0..6].* });
+    while (try iter.next()) |addr| {
+        try addrs.append(addr);
     }
 
     return try addrs.toOwnedSlice();
 }
 
+/// Gets the MAC address of the first non-loopback interface.
 pub fn getFirstNoLoopback(allocator: mem.Allocator) !MacAddress {
     var iter = try IfIterator.initAlloc(allocator);
 
-    while (try iter.next()) |ifr| {
-        if (ifr.ifru.flags & IFF_LOOPBACK != 0) {
+    while (try iter.next()) |addr| {
+        if (addr.is_loopback) {
             continue;
         }
-        return .{ .data = ifr.ifru.hwaddr.data[0..6].* };
+
+        return addr;
     }
 
     return MacAddressError.NoDevice;
@@ -78,19 +80,23 @@ const IfIterator = struct {
         self.allocator.free(self.buffer);
     }
 
-    pub fn next(self: *IfIterator) !?ifreq {
+    pub fn next(self: *IfIterator) !?MacAddress {
         if (self.index >= self.buffer.len) {
             return null;
         }
 
         const elem = &self.buffer[self.index];
+        var addr = mem.zeroes(MacAddress);
+
+        ioctlReq(self.sock_fd, SIOCGIFFLAGS, elem) catch return MacAddressError.OsError;
+        addr.is_loopback = elem.ifru.flags & IFF_LOOPBACK != 0;
 
         ioctlReq(self.sock_fd, SIOCGIFHWADDR, elem) catch return MacAddressError.OsError;
-        ioctlReq(self.sock_fd, SIOCGIFFLAGS, elem) catch return MacAddressError.OsError;
+        addr.data = elem.ifru.hwaddr.data[0..6].*;
 
         self.index += 1;
 
-        return elem.*;
+        return addr;
     }
 };
 
