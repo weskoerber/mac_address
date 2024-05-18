@@ -9,7 +9,7 @@
 /// The caller is owns the returned memory.
 pub fn getAll(allocator: mem.Allocator) ![]MacAddress {
     var addrs = std.ArrayList(MacAddress).init(allocator);
-    var iter = try IfIterator.initAlloc(allocator, .{});
+    var iter = try IfIterator.initAlloc(allocator);
 
     while (try iter.next()) |ifr| {
         try addrs.append(MacAddress{ .data = ifr.ifru.hwaddr.data[0..6].* });
@@ -19,7 +19,7 @@ pub fn getAll(allocator: mem.Allocator) ![]MacAddress {
 }
 
 pub fn getFirstNoLoopback(allocator: mem.Allocator) !MacAddress {
-    var iter = try IfIterator.initAlloc(allocator, .{ .flags = true });
+    var iter = try IfIterator.initAlloc(allocator);
 
     while (try iter.next()) |ifr| {
         if (ifr.ifru.flags & IFF_LOOPBACK != 0) {
@@ -46,10 +46,9 @@ const IfIterator = struct {
     allocator: mem.Allocator,
     buffer: []ifreq,
     index: usize,
-    query_options: QueryOptions,
     sock_fd: i32,
 
-    pub fn initAlloc(allocator: mem.Allocator, query_options: QueryOptions) !IfIterator {
+    pub fn initAlloc(allocator: mem.Allocator) !IfIterator {
         const sock = linux.socket(linux.AF.INET, linux.SOCK.DGRAM, linux.IPPROTO.IP);
         const sock_fd = if (posix.errno(sock) == .SUCCESS)
             @as(linux.fd_t, @intCast(sock))
@@ -71,7 +70,6 @@ const IfIterator = struct {
             .allocator = allocator,
             .buffer = elems,
             .index = 0,
-            .query_options = query_options,
             .sock_fd = sock_fd,
         };
     }
@@ -87,11 +85,8 @@ const IfIterator = struct {
 
         const elem = &self.buffer[self.index];
 
-        if (self.query_options.hwaddr)
-            ioctlReq(self.sock_fd, SIOCGIFHWADDR, elem) catch return MacAddressError.OsError;
-
-        if (self.query_options.flags)
-            ioctlReq(self.sock_fd, SIOCGIFFLAGS, elem) catch return MacAddressError.OsError;
+        ioctlReq(self.sock_fd, SIOCGIFHWADDR, elem) catch return MacAddressError.OsError;
+        ioctlReq(self.sock_fd, SIOCGIFFLAGS, elem) catch return MacAddressError.OsError;
 
         self.index += 1;
 
@@ -109,10 +104,6 @@ const options = @import("options");
 const log = if (options.verbose) std.log.scoped(.mac_address) else fn () void{};
 const MacAddress = @import("MacAddress.zig");
 const MacAddressError = @import("errors.zig").MacAddressError;
-const QueryOptions = struct {
-    flags: bool = false,
-    hwaddr: bool = true,
-};
 
 // These definitions aren't in zig's standard library
 const SIOCGIFCONF = 0x8912;
