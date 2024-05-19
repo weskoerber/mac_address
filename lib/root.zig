@@ -6,6 +6,7 @@ pub fn getAll(allocator: std.mem.Allocator) ![]MacAddress {
     return switch (native_os) {
         .linux => linux.getAll(allocator),
         .windows => windows.getAll(allocator),
+        else => |x| @panic("Unsupported OS '" ++ @tagName(x) ++ "'"),
     };
 }
 
