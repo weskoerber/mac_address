@@ -21,8 +21,21 @@ pub fn getFirstNoLoopback(allocator: std.mem.Allocator) !MacAddress {
 
 const std = @import("std");
 const builtin = @import("builtin");
+const testing = std.testing;
 
 const linux = @import("linux.zig");
 const windows = @import("windows.zig");
 
 const native_os = builtin.os.tag;
+
+test "get_all" {
+    const addrs = try getAll(testing.allocator);
+    defer testing.allocator.free(addrs);
+}
+
+test "get_first_no_loopback" {
+    const addr = try getFirstNoLoopback(testing.allocator);
+
+    try testing.expectEqual(false, addr.is_loopback);
+    try testing.expect(!std.mem.eql(u8, &addr.data, &.{ 0, 0, 0, 0, 0, 0 }));
+}
