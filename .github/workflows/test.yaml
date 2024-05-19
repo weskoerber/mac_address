@@ -11,7 +11,7 @@ jobs:
       - name: clone zvm
         run: git clone https://github.com/weskoerber/zvm -b chore/actions-test
       - name: install zig
-        run: ZVM_BIN=/usr/bin ./zvm/zvm --verbose install --use master
+        run: ./zvm/zvm --verbose install --use master
       - name: print zig version
         run: zig version
       # - name: install zig
