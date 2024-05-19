@@ -6,7 +6,11 @@ on:
       - main
 jobs:
   test-ubuntu:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    stragegy:
+      os:
+        - ubuntu-latest
+        - macos-latest
     steps:
       - name: install zig
         uses: weskoerber/setup-zig@main
