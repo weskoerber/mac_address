@@ -9,7 +9,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-latest, macos-latest-large ]
+        os: [ ubuntu-latest, windows-latest ]
     steps:
       - name: install zig
         uses: weskoerber/setup-zig@main
