@@ -5,8 +5,13 @@ on:
     branches:
       - main
 jobs:
-  test:
-    runs-on: ubuntu-latest
+  test-ubuntu:
+    runs-on: ${{ matrix.os }}
+    stragegy:
+      os:
+        - ubuntu-latest
+        - macos-latest
+        - windows-latest
     steps:
       - name: install zig
         uses: mlugg/setup-zig@v2
