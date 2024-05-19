@@ -1,3 +1,5 @@
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/weskoerber/mac_address/test.yaml?label=tests)
+
 # `mac_address`
 
 A cross-platform library to retrieve the MAC address from your network
