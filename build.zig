@@ -39,6 +39,18 @@ pub fn build(b: *std.Build) void {
     }
 
     addDocsStep(b, .{ .target = target, .optimize = optimize });
+
+    const test_step = b.step("test", "Run tests");
+
+    const test_exe = b.addTest(.{
+        .target = target,
+        .optimize = optimize,
+        .root_source_file = b.path("lib/root.zig"),
+    });
+    test_exe.root_module.addOptions("options", build_options);
+
+    const run_test_exe = b.addRunArtifact(test_exe);
+    test_step.dependOn(&run_test_exe.step);
 }
 
 fn buildExamples(b: *std.Build, import: std.Build.Module.Import, options: anytype) !void {

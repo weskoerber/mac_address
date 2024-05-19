@@ -1,0 +1,16 @@
+name: test
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+jobs:
+  test-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - name: install zig
+        uses: weskoerber/setup-zig@main
+      - name: checkout
+        uses: actions/checkout@v4
+      - name: test
+        run: zig build test
