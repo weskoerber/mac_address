@@ -4,10 +4,10 @@ jobs:
   test-ubuntu:
     runs-on: ubuntu-latest
     steps:
-      - name: checkout
-        uses: actions/checkout@v4
       - name: install zig
         uses: weskoerber/setup-zig@main
+      - name: checkout
+        uses: actions/checkout@v4
       - name: print zig version
         run: zig version
       - name: ls
