@@ -6,15 +6,11 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
-        with:
-          submodules: true
       - name: install zig
         uses: weskoerber/setup-zig@main
-      # - name: clone zvm
-      #   run: git clone https://github.com/weskoerber/zvm -b chore/actions-test
-      # - name: install zig
-      #   run: ./zvm/zvm --verbose install --use master
       - name: print zig version
         run: zig version
+      - name: ls
+        run: ls -lah
       - name: test
         run: zig build -Dexamples=true
