@@ -3,6 +3,10 @@
 A cross-platform library to retrieve the MAC address from your network
 interfaces without `libc`.
 
+## Requirements
+
+- [`zig`](https://github.com/ziglang/zig) compiler (`0.12.0` and up)[^1]
+
 ## Install
 
 First, add the dependency to your `build.zig.zon file` using `zig fetch`:
@@ -59,3 +63,11 @@ built by setting the `examples` option to `true`:
 - ✅ = supported
 - 📝 = planned
 - ❌ = not supported
+
+---
+
+[^1]: Shameless plug: if you're using a unix-like operating system or WSL on
+    Windows, consider using a Zig compiler version manager I wrote called
+    [zvm](https://github.com/weskoerber/zvm). Once downloaded and in your
+    `PATH`, just run `zvm install 0.12.0` (or `zvm install master` to get the
+    latest nightly).
