@@ -8,9 +8,5 @@ jobs:
         uses: weskoerber/setup-zig@main
       - name: checkout
         uses: actions/checkout@v4
-      - name: build
-        run: zig build -Dexamples=true
-      - name: run `print_all`
-        run: ./zig-out/bin/print_all
-      - name: run `print_first_no_loopback`
-        run: ./zig-out/bin/print_first_no_loopback
+      - name: test
+        run: zig build test
