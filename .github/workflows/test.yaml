@@ -13,6 +13,6 @@ jobs:
         with:
           submodules: true
       - name: install zig
-        uses: weskoerber/setup-zig
+        uses: weskoerber/setup-zig@main
       - name: test
         run: zig build -Dexamples=true
