@@ -14,4 +14,5 @@ jobs:
           submodules: true
       - name: install zig
         uses: weskoerber/setup-zig
+      - name: test
         run: zig build -Dexamples=true
