@@ -37,6 +37,8 @@ pub fn build(b: *std.Build) void {
             std.debug.print("error: {}\n  -> failed building examples\n", .{err});
         };
     }
+
+    addDocsStep(b, .{ .target = target, .optimize = optimize });
 }
 
 fn buildExamples(b: *std.Build, import: std.Build.Module.Import, options: anytype) !void {
@@ -64,4 +66,23 @@ fn buildExamples(b: *std.Build, import: std.Build.Module.Import, options: anytyp
         exe.root_module.addImport(import.name, import.module);
         b.installArtifact(exe);
     }
+}
+
+fn addDocsStep(b: *std.Build, options: anytype) void {
+    const docs_step = b.step("docs", "Emit docs");
+
+    const lib = b.addStaticLibrary(.{
+        .name = "mac_address",
+        .root_source_file = b.path("lib/root.zig"),
+        .target = options.target,
+        .optimize = options.optimize,
+    });
+
+    const docs_install = b.addInstallDirectory(.{
+        .install_dir = .prefix,
+        .install_subdir = "docs",
+        .source_dir = lib.getEmittedDocs(),
+    });
+
+    docs_step.dependOn(&docs_install.step);
 }
