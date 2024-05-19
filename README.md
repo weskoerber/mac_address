@@ -1,4 +1,5 @@
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/weskoerber/mac_address/test.yaml?label=tests)
+[![test](https://github.com/weskoerber/mac_address/actions/workflows/test.yaml/badge.svg)](https://github.com/weskoerber/mac_address/actions/workflows/test.yaml)
+[![docs](https://github.com/weskoerber/mac_address/actions/workflows/docs.yaml/badge.svg)](https://github.com/weskoerber/mac_address/actions/workflows/docs.yaml)
 
 # `mac_address`
 
