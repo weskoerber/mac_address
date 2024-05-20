@@ -8,11 +8,11 @@ interfaces without `libc`.
 
 ## Requirements
 
-- [`zig`](https://github.com/ziglang/zig) compiler (`0.12.0` and up)[^1]
+- [zig](https://github.com/ziglang/zig) compiler (`0.12.0` or newer)[^1]
 
 ## Install
 
-First, add the dependency to your `build.zig.zon file` using `zig fetch`:
+First, add the dependency to your `build.zig.zon` using `zig fetch`:
 
 ```console
 zig fetch --save git+https://github.com/weskoerber/mac_address#main
