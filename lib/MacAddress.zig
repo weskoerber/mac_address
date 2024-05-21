@@ -30,7 +30,7 @@ pub fn parse(buf: []const u8) !Self {
     };
 }
 
-pub fn toString(self: Self, buf: []u8) ![]u8 {
+pub fn formatBuf(self: Self, buf: []u8) ![]u8 {
     return std.fmt.bufPrint(buf, "{x:0>2}:{x:0>2}:{x:0>2}:{x:0>2}:{x:0>2}:{x:0>2}", .{
         self.data[0],
         self.data[1],
@@ -39,6 +39,11 @@ pub fn toString(self: Self, buf: []u8) ![]u8 {
         self.data[4],
         self.data[5],
     }) catch return FormatError.NoSpaceLeft;
+}
+
+pub fn formatAlloc(self: Self, allocator: std.mem.Allocator) ![]u8 {
+    const buf = try allocator.alloc(u8, 17);
+    return self.formatBuf(buf);
 }
 
 const std = @import("std");
@@ -79,17 +84,26 @@ test "parse_error_malformed2" {
     try testing.expectError(ParseError.InvalidInput, Self.parse(str));
 }
 
-test "tostring_success" {
+test "format_buf_success" {
     const addr = Self{ .is_loopback = false, .data = .{ 0x00, 0x11, 0x22, 0x33, 0x44, 0x55 } };
     const expected = "00:11:22:33:44:55";
     var buf: [17]u8 = undefined;
 
-    try testing.expectEqualSlices(u8, expected, try addr.toString(&buf));
+    try testing.expectEqualSlices(u8, expected, try addr.formatBuf(&buf));
 }
 
-test "tostring_too_small" {
+test "format_buf_too_small" {
     const addr = Self{ .is_loopback = false, .data = .{ 0x00, 0x11, 0x22, 0x33, 0x44, 0x55 } };
     var buf: [16]u8 = undefined;
 
-    try testing.expectError(FormatError.NoSpaceLeft, addr.toString(&buf));
+    try testing.expectError(FormatError.NoSpaceLeft, addr.formatBuf(&buf));
+}
+
+test "format_alloc_success" {
+    const addr = Self{ .is_loopback = false, .data = .{ 0x00, 0x11, 0x22, 0x33, 0x44, 0x55 } };
+    const expected = "00:11:22:33:44:55";
+    const buf = try addr.formatAlloc(testing.allocator);
+    defer testing.allocator.free(buf);
+
+    try testing.expectEqualSlices(u8, expected, buf);
 }
