@@ -11,10 +11,11 @@
     },
     .paths = .{
         ".gitignore",
-        "LICENSE",
-        "README.md",
         "build.zig",
         "build.zig.zon",
-        "lib/root.zig",
+        "examples/",
+        "lib/",
+        "LICENSE",
+        "README.md",
     },
 }
