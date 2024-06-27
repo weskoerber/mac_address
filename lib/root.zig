@@ -15,6 +15,7 @@ pub fn getAll(allocator: std.mem.Allocator) ![]MacAddress {
 pub fn getFirstNoLoopback(allocator: std.mem.Allocator) !MacAddress {
     return switch (native_os) {
         .linux => linux.getFirstNoLoopback(allocator),
+        .windows => windows.getFirstNoLoopback(allocator),
         else => |x| @panic("Unsupported OS '" ++ @tagName(x) ++ "'"),
     };
 }
