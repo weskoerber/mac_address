@@ -61,7 +61,7 @@ built by setting the `examples` option to `true`:
 | `mac_address` API  | Linux | Windows |
 | ------------------ | ----- | ------- |
 | `getAll`           | ✅    | ✅      |
-| `getAllNoLoopback` | ✅    | 📝      |
+| `getAllNoLoopback` | ✅    | ✅      |
 
 - ✅ = supported
 - 📝 = planned
