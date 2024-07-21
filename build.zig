@@ -18,16 +18,6 @@ pub fn build(b: *std.Build) void {
     build_options.addOption(bool, "verbose", verbose);
     mod.addOptions("options", build_options);
 
-    if (target.result.os.tag == .windows) {
-        const zigwin32_mod = b.dependency("zigwin32", .{
-            .target = target,
-            .optimize = optimize,
-        }).module("zigwin32");
-
-        mod.addImport("win32", zigwin32_mod);
-        mod.pic = true;
-    }
-
     if (examples) {
         buildExamples(
             b,
@@ -51,6 +41,18 @@ pub fn build(b: *std.Build) void {
 
     const run_test_exe = b.addRunArtifact(test_exe);
     test_step.dependOn(&run_test_exe.step);
+
+    if (target.result.os.tag == .windows) {
+        const zigwin32_mod = b.dependency("zigwin32", .{
+            .target = target,
+            .optimize = optimize,
+        }).module("zigwin32");
+
+        mod.addImport("win32", zigwin32_mod);
+        mod.pic = true;
+
+        test_exe.root_module.addImport("win32", zigwin32_mod);
+    }
 }
 
 fn buildExamples(b: *std.Build, import: std.Build.Module.Import, options: anytype) !void {
