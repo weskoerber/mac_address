@@ -106,8 +106,9 @@ const IfIterator = struct {
 
         ioctlReq(self.sock_fd, SIOCGIFFLAGS, elem) catch return MacAddressError.OsError;
         const is_loopback = elem.ifru.flags & IFF_LOOPBACK != 0;
+        const is_noarp = elem.ifru.flags & IFF_NOARP != 0;
 
-        if (self.iterator_options.skip_loopback and is_loopback) {
+        if ((self.iterator_options.skip_loopback and is_loopback) or is_noarp) {
             self.index += 1;
             return self.next();
         }
@@ -155,6 +156,7 @@ const SIOCGIFHWADDR = 0x8927;
 
 const IFNAMESIZE = linux.IFNAMESIZE;
 const IFF_LOOPBACK = 0x8;
+const IFF_NOARP = 0x80;
 const sockaddr = linux.sockaddr;
 
 // https://github.com/ziglang/zig/issues/19980
