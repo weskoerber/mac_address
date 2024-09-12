@@ -37,5 +37,5 @@ test "get_all" {
 test "get_first_no_loopback" {
     const addr = try getFirstNoLoopback(testing.allocator);
 
-    try testing.expectEqualSlices(u8, &addr.data, &.{ 0, 0, 0, 0, 0, 0 });
+    try testing.expect(std.mem.indexOfDiff(u8, &addr.data, &.{ 0, 0, 0, 0, 0, 0 }) != null);
 }
