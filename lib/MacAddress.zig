@@ -56,6 +56,20 @@ pub fn formatAlloc(self: Self, allocator: std.mem.Allocator) ![]u8 {
     return self.formatBuf(buf);
 }
 
+/// Formats a MAC address to a string.
+///
+/// Note: The `fmt` and `options` arguments are required to work with
+/// `std.fmt.format`, but are not used in `MacAddress`'s implementation.
+pub fn format(self: Self, comptime fmt: []const u8, options: std.fmt.FormatOptions, writer: anytype) !void {
+    _ = options;
+    _ = fmt;
+
+    var buf: [MAC_STR_LEN]u8 = undefined;
+    const str = try self.formatBuf(&buf);
+
+    try writer.writeAll(str);
+}
+
 const std = @import("std");
 const testing = std.testing;
 
