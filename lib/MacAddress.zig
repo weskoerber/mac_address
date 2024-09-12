@@ -12,6 +12,12 @@ pub const FormatError = error{
     NoSpaceLeft,
 };
 
+/// Parse a string into a `MacAddress`.
+///
+/// The `is_loopback` field is set to `false` but does not mean the parsed
+/// value is not a loopback interface. This function does not make any
+/// syscalls, so it knows nothing about the interface that's identified by the
+/// value -- it's purely for display.
 pub fn parse(buf: []const u8) !Self {
     var data: [6]u8 = undefined;
     var iter = std.mem.tokenizeScalar(u8, buf, ':');
@@ -30,6 +36,8 @@ pub fn parse(buf: []const u8) !Self {
     };
 }
 
+/// Format a `MacAddress` as a string, with each byte separated by colons. The
+/// buffer must be at least 17 bytes long.
 pub fn formatBuf(self: Self, buf: []u8) ![]u8 {
     return std.fmt.bufPrint(buf, "{x:0>2}:{x:0>2}:{x:0>2}:{x:0>2}:{x:0>2}:{x:0>2}", .{
         self.data[0],
@@ -41,6 +49,8 @@ pub fn formatBuf(self: Self, buf: []u8) ![]u8 {
     }) catch return FormatError.NoSpaceLeft;
 }
 
+/// Format a `MacAddress` as a string, with each byte separated by colons. The
+/// caller owns the returned memory.
 pub fn formatAlloc(self: Self, allocator: std.mem.Allocator) ![]u8 {
     const buf = try allocator.alloc(u8, MAC_STR_LEN);
     return self.formatBuf(buf);
