@@ -104,8 +104,6 @@ const IfIterator = struct {
 
         const elem = &self.buffer[self.index];
 
-        std.debug.print("if: {s}\n", .{elem.ifrn.name});
-
         ioctlReq(self.sock_fd, SIOCGIFFLAGS, elem) catch return MacAddressError.OsError;
         const is_loopback = elem.ifru.flags & IFF_LOOPBACK != 0;
 

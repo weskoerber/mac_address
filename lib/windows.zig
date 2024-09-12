@@ -23,7 +23,6 @@ pub fn getAll(allocator: mem.Allocator) ![]MacAddress {
     while (node) |adapter| : (node = node.?.Next) {
         try addrs.append(MacAddress{
             .data = adapter.PhysicalAddress[0..6].*,
-            .is_loopback = if (adapter.IfType == MIB_IF_TYPE_LOOPBACK) true else false,
         });
     }
 
@@ -52,7 +51,6 @@ pub fn getFirstNoLoopback(allocator: mem.Allocator) !MacAddress {
         if (adapter.IfType != MIB_IF_TYPE_LOOPBACK) {
             return MacAddress{
                 .data = adapter.PhysicalAddress[0..6].*,
-                .is_loopback = false,
             };
         }
     }
