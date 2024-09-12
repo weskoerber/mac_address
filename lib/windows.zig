@@ -73,7 +73,3 @@ const GetAdaptersAddresses = ip_helper.GetAdaptersAddresses;
 const MIB_IF_TYPE_LOOPBACK = ip_helper.MIB_IF_TYPE_LOOPBACK;
 const MacAddress = @import("MacAddress.zig");
 const MacAddressError = @import("errors.zig").MacAddressError;
-
-const AdapterOptions = struct {
-    exclude_loopback: bool = false,
-};
