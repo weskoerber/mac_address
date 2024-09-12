@@ -11,6 +11,6 @@ pub fn main() !void {
 
     const addrs = try mac_address.getAll(allocator);
     for (addrs) |addr| {
-        debug.print("{x:0>2}\n", .{addr.data});
+        debug.print("{}\n", .{addr});
     }
 }

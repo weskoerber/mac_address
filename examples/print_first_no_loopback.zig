@@ -10,5 +10,5 @@ pub fn main() void {
         return;
     };
 
-    debug.print("{x:0>2}\n", .{addr.data});
+    debug.print("{}\n", .{addr});
 }
