@@ -42,7 +42,7 @@ pub fn formatBuf(self: Self, buf: []u8) ![]u8 {
 }
 
 pub fn formatAlloc(self: Self, allocator: std.mem.Allocator) ![]u8 {
-    const buf = try allocator.alloc(u8, 17);
+    const buf = try allocator.alloc(u8, MAC_STR_LEN);
     return self.formatBuf(buf);
 }
 
@@ -50,6 +50,10 @@ const std = @import("std");
 const testing = std.testing;
 
 const Self = @This();
+
+// The max length of a MAC address, formatted as a string with each byte
+// separated with a colon.
+const MAC_STR_LEN = 17;
 
 test "parse_success" {
     const str = "00:11:22:33:44:55";
@@ -87,7 +91,7 @@ test "parse_error_malformed2" {
 test "format_buf_success" {
     const addr = Self{ .is_loopback = false, .data = .{ 0x00, 0x11, 0x22, 0x33, 0x44, 0x55 } };
     const expected = "00:11:22:33:44:55";
-    var buf: [17]u8 = undefined;
+    var buf: [MAC_STR_LEN]u8 = undefined;
 
     try testing.expectEqualSlices(u8, expected, try addr.formatBuf(&buf));
 }
