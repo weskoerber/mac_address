@@ -14,7 +14,7 @@
 /// The caller is owns the returned memory.
 pub fn getAll(allocator: mem.Allocator) ![]MacAddress {
     var addrs = std.ArrayList(MacAddress).init(allocator);
-    var iter = try IfIterator.initAlloc(allocator);
+    var iter = try IfIterator.initAlloc(allocator, .{});
     defer iter.deinit();
 
     while (try iter.next()) |addr| {
@@ -33,14 +33,10 @@ pub fn getAll(allocator: mem.Allocator) ![]MacAddress {
 /// The returned memory is stack allocated and returned by value; the caller
 /// need not free anything.
 pub fn getFirstNoLoopback(allocator: mem.Allocator) !MacAddress {
-    var iter = try IfIterator.initAlloc(allocator);
+    var iter = try IfIterator.initAlloc(allocator, .{ .skip_loopback = true });
     defer iter.deinit();
 
     while (try iter.next()) |addr| {
-        if (addr.is_loopback) {
-            continue;
-        }
-
         return addr;
     }
 
@@ -63,8 +59,13 @@ const IfIterator = struct {
     buffer: []ifreq,
     index: usize,
     sock_fd: i32,
+    iterator_options: IteratorOptions,
 
-    pub fn initAlloc(allocator: mem.Allocator) !IfIterator {
+    pub const IteratorOptions = struct {
+        skip_loopback: bool = false,
+    };
+
+    pub fn initAlloc(allocator: mem.Allocator, iterator_options: IteratorOptions) !IfIterator {
         const sock = linux.socket(linux.AF.INET, linux.SOCK.DGRAM, linux.IPPROTO.IP);
         const sock_fd = if (posix.errno(sock) == .SUCCESS)
             @as(linux.fd_t, @intCast(sock))
@@ -87,6 +88,7 @@ const IfIterator = struct {
             .buffer = elems,
             .index = 0,
             .sock_fd = sock_fd,
+            .iterator_options = iterator_options,
         };
     }
 
@@ -101,13 +103,20 @@ const IfIterator = struct {
         }
 
         const elem = &self.buffer[self.index];
-        var addr = mem.zeroes(MacAddress);
 
         ioctlReq(self.sock_fd, SIOCGIFFLAGS, elem) catch return MacAddressError.OsError;
-        addr.is_loopback = elem.ifru.flags & IFF_LOOPBACK != 0;
+        const is_loopback = elem.ifru.flags & IFF_LOOPBACK != 0;
+
+        if (self.iterator_options.skip_loopback and is_loopback) {
+            self.index += 1;
+            return self.next();
+        }
 
         ioctlReq(self.sock_fd, SIOCGIFHWADDR, elem) catch return MacAddressError.OsError;
-        addr.data = elem.ifru.hwaddr.data[0..6].*;
+        const hwaddr = elem.ifru.hwaddr.data[0..6].*;
+
+        var addr = mem.zeroes(MacAddress);
+        addr.data = hwaddr;
 
         self.index += 1;
 
