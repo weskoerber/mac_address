@@ -17,7 +17,9 @@ jobs:
       - ubuntu-latest
     steps:
       - name: install zig
-        uses: weskoerber/setup-zig@main
+        uses: mlugg/setup-zig@v1
+        with:
+          version: master
       - name: checkout
         uses: actions/checkout@v4
       - name: generate docs
