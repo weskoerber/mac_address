@@ -8,10 +8,11 @@ jobs:
   test:
     runs-on: ${{ matrix.os }}
     strategy:
-      os:
-        - ubuntu-latest
-        - macos-latest
-        - windows-latest
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
     steps:
       - name: install zig
         uses: mlugg/setup-zig@v2
