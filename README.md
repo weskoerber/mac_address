@@ -9,7 +9,7 @@ interfaces without `libc`.
 ## Requirements
 
 - [Zig](https://github.com/ziglang/zig) compiler (`0.14.0` or newer)[^1]
-    -- If using Zig `0.12` and `0.13`, use the [`zig-0.12`](https://github.com/weskoerber/mac_address/tree/zig-0.12) branch
+    - If using Zig `0.12` and `0.13`, use the [`zig-0.12`](https://github.com/weskoerber/mac_address/tree/zig-0.12) branch
 
 ## Install
 
