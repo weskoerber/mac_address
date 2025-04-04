@@ -8,7 +8,8 @@ interfaces without `libc`.
 
 ## Requirements
 
-- [zig](https://github.com/ziglang/zig) compiler (`0.12.0` or newer)[^1]
+- [Zig](https://github.com/ziglang/zig) compiler (`0.14.0` or newer)[^1]
+    -- If using Zig `0.12` and `0.13`, use the [`zig-0.12`](https://github.com/weskoerber/mac_address/tree/zig-0.12) branch
 
 ## Install
 
@@ -46,7 +47,8 @@ pub fn build(b: *std.Build) void {
 ## Usage
 
 See the `examples` directory for example usage. Example executables can be
-built by setting the `examples` option to `true`:
+built by setting the `examples` option to `true` (or `-Dexamples=true` on the
+CLI):
 
 ```zig
     const mac_address = b.dependency("mac_address", .{
@@ -54,6 +56,10 @@ built by setting the `examples` option to `true`:
             .optimize = optimize,
             .examples = true,
     }).module("mac_address");
+```
+
+```console
+zig build -Dexamples=true
 ```
 
 ## Cross-platform support

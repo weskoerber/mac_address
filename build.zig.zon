@@ -1,12 +1,12 @@
 .{
-    .name = "mac_address",
-    .version = "0.1.1",
-    .minimum_zig_version = "0.12.0",
+    .name = .mac_address,
+    .fingerprint = 0xb728e969171b9c69,
+    .version = "0.0.1",
+    .minimum_zig_version = "0.14.0",
     .dependencies = .{
         .zigwin32 = .{
-            // https://github.com/marlersoft/zigwin32gen/pull/32
-            .url = "git+https://github.com/weskoerber/zigwin32#feat/better-zig-version-support",
-            .hash = "1220d0d31e4de8ec32b5e89da54819919c94e0206ca9d1c7e0db37813d2083399c8d",
+            .url = "https://github.com/marlersoft/zigwin32/archive/d21b419d808215e1f82605fdaddc49750bfa3bca.tar.gz",
+            .hash = "zigwin32-25.0.28-preview-AAAAAI0J-wP-8_KKo4Yjr33XLhVhlJmeagGUedByaOnX",
         },
     },
     .paths = .{
