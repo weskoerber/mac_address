@@ -29,11 +29,11 @@ pub fn build(b: *std.Build) void {
     b.installArtifact(exe1);
 
     const exe2 = b.addExecutable(.{
-        .name = "print_first_no_loopback",
+        .name = "print_first",
         .root_module = b.createModule(.{
             .target = target,
             .optimize = optimize,
-            .root_source_file = b.path("examples/print_first_no_loopback.zig"),
+            .root_source_file = b.path("examples/print_first.zig"),
         }),
     });
     exe2.root_module.addImport("mac_address", mod);
