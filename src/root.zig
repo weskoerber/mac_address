@@ -4,7 +4,7 @@ pub const MacAddressError = @import("errors.zig").MacAddressError;
 /// Retrieve all MAC addresses.
 pub fn getAll(allocator: std.mem.Allocator) ![]MacAddress {
     return switch (native_os) {
-        .linux, .macos => linux.getAll(allocator),
+        .linux => linux.getAll(allocator),
         .windows => windows.getAll(allocator),
         else => |x| @panic("Unsupported OS '" ++ @tagName(x) ++ "'"),
     };
