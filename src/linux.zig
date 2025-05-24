@@ -108,7 +108,7 @@ const IfIterator = struct {
         const is_loopback = elem.ifru.flags & IFF_LOOPBACK != 0;
         const is_noarp = elem.ifru.flags & IFF_NOARP != 0;
 
-        if ((self.iterator_options.skip_loopback and is_loopback) or is_noarp) {
+        if (is_loopback or is_noarp) {
             self.index += 1;
             return self.next();
         }
