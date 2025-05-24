@@ -56,7 +56,7 @@ fn ioctlReq(fd: linux.fd_t, req: u32, arg: *anyopaque) !void {
 
 const IfIterator = struct {
     allocator: mem.Allocator,
-    buffer: []ifreq,
+    buffer: []std.os.linux.ifreq,
     index: usize,
     sock_fd: i32,
     iterator_options: IteratorOptions,
@@ -74,14 +74,14 @@ const IfIterator = struct {
 
         var ifc = mem.zeroes(ifconf);
 
-        try ioctlReq(sock_fd, SIOCGIFCONF, &ifc);
+        try ioctlReq(sock_fd, std.os.linux.SIOCGIFCONF, &ifc);
 
-        const num_elems = @divTrunc(@as(u32, @intCast(ifc.ifc_len)), @sizeOf(ifreq));
-        const elems = try allocator.alloc(ifreq, num_elems);
+        const num_elems = @divTrunc(@as(u32, @intCast(ifc.ifc_len)), @sizeOf(std.os.linux.ifreq));
+        const elems = try allocator.alloc(std.os.linux.ifreq, num_elems);
 
         ifc.ifc_ifu.ifc_buf = @alignCast(@ptrCast(elems.ptr));
 
-        try ioctlReq(sock_fd, SIOCGIFCONF, &ifc);
+        try ioctlReq(sock_fd, std.os.linux.SIOCGIFCONF, &ifc);
 
         return .{
             .allocator = allocator,
@@ -104,16 +104,15 @@ const IfIterator = struct {
 
         const elem = &self.buffer[self.index];
 
-        ioctlReq(self.sock_fd, SIOCGIFFLAGS, elem) catch return MacAddressError.OsError;
-        const is_loopback = elem.ifru.flags & IFF_LOOPBACK != 0;
-        const is_noarp = elem.ifru.flags & IFF_NOARP != 0;
+        ioctlReq(self.sock_fd, std.os.linux.SIOCGIFFLAGS, elem) catch return MacAddressError.OsError;
+        const flags = elem.ifru.flags;
 
-        if (is_loopback or is_noarp) {
+        if (flags.LOOPBACK or flags.NOARP) {
             self.index += 1;
             return self.next();
         }
 
-        ioctlReq(self.sock_fd, SIOCGIFHWADDR, elem) catch return MacAddressError.OsError;
+        ioctlReq(self.sock_fd, std.os.linux.SIOCGIFHWADDR, elem) catch return MacAddressError.OsError;
         const hwaddr = elem.ifru.hwaddr.data[0..6].*;
 
         var addr = mem.zeroes(MacAddress);
@@ -149,48 +148,10 @@ const NullLogger = struct {
     }
 };
 
-// These definitions aren't in zig's standard library
-const SIOCGIFCONF = 0x8912;
-const SIOCGIFFLAGS = 0x8913;
-const SIOCGIFHWADDR = 0x8927;
-
-const IFNAMESIZE = linux.IFNAMESIZE;
-const IFF_LOOPBACK = 0x8;
-const IFF_NOARP = 0x80;
-const sockaddr = linux.sockaddr;
-
-// https://github.com/ziglang/zig/issues/19980
-pub const ifreq = extern struct {
-    ifrn: extern union {
-        name: [IFNAMESIZE]u8,
-    },
-    ifru: extern union {
-        addr: sockaddr,
-        dstaddr: sockaddr,
-        broadaddr: sockaddr,
-        netmask: sockaddr,
-        hwaddr: sockaddr,
-        flags: i16,
-        ivalue: i32,
-        mtu: i32,
-        map: ifmap,
-        slave: [IFNAMESIZE - 1:0]u8,
-        newname: [IFNAMESIZE - 1:0]u8,
-        data: ?[*]u8,
-    },
-};
-pub const ifmap = extern struct {
-    mem_start: usize,
-    mem_end: usize,
-    base_addr: u16,
-    irq: u8,
-    dma: u8,
-    port: u8,
-};
 const ifconf = extern struct {
     ifc_len: i32,
     ifc_ifu: extern union {
         ifc_buf: ?[*]u8,
-        ifc_req: ?[*]ifreq,
+        ifc_req: ?[*]std.os.linux.ifreq,
     },
 };
