@@ -24,25 +24,6 @@ pub fn getAll(allocator: mem.Allocator) ![]MacAddress {
     return try addrs.toOwnedSlice();
 }
 
-/// Gets the MAC address of the first non-loopback interface.
-///
-/// Internally, this function works identically to the `getAll` function except
-/// that it returns a single `MacAddress` struct, whereas `getAll` returns a
-/// slice of `MacAddress` structs.
-///
-/// The returned memory is stack allocated and returned by value; the caller
-/// need not free anything.
-pub fn getFirstNoLoopback(allocator: mem.Allocator) !MacAddress {
-    var iter = try IfIterator.initAlloc(allocator, .{ .skip_loopback = true });
-    defer iter.deinit();
-
-    while (try iter.next()) |addr| {
-        return addr;
-    }
-
-    return MacAddressError.NoDevice;
-}
-
 fn ioctlReq(fd: linux.fd_t, req: u32, arg: *anyopaque) !void {
     const arg_int = @intFromPtr(arg);
 
